@@ -38,7 +38,7 @@ Glue V1 is composed of 7 interfaces:
 - [**IGlueERC721**](https://github.com/glue-finance/glue/blob/main/contracts/interfaces/IGlueERC721.sol): is the interface for the GlueERC721 contract.
 - [**IGluedSettings**](https://github.com/glue-finance/glue/blob/main/contracts/interfaces/IGluedSettings.sol): is the interface for the GluedSettings contract.
 - [**IGluedLoanReceiver**](https://github.com/glue-finance/glue/blob/main/contracts/interfaces/IGluedLoanReceiver.sol): is the interface for interacting with Glued Loans and Flash Loans from glues.
-- **IGluedHooks**: is the interface that defines callback mechanisms for Sticky Assets to interact with the Glue Protocol.
+- [**IGluedHooks**](https://github.com/glue-finance/glue/blob/main/contracts/interfaces/IGluedHooks.sol): is the interface that defines callback mechanisms for Sticky Assets to interact with the Glue Protocol.
 - [**IStickyAsset**](https://github.com/glue-finance/glue/blob/main/contracts/interfaces/IStickyAsset.sol): is the xtension interface that defines callback mechanisms for Sticky Assets to interact with the Glue Protocol
 
 ## Deployments:
