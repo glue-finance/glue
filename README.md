@@ -22,7 +22,7 @@ Glue V1 is a permissionless protocol that allows any ERC20 token or ERC721 Enume
 
 Glue V1 is composed of 6 smart contracts:
 
-- **GlueStickERC20**: is the factory contract that glues ERC20 tokens.
+- [**GlueStickERC20**](https://github.com/glue-finance/glue/blob/main/contracts/GlueERC20.sol): is the factory contract that glues ERC20 tokens.
 - **GlueStickERC721**: is the factory contract that glues ERC721E tokens.
 - **GlueERC20**: is the contract that creates the Glue Address for a Sticky Token.
 - **GlueERC721**: is the contract that creates the Glue Address for a Sticky Token.
