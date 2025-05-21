@@ -20,7 +20,7 @@ Glue V1 is a permissionless protocol that allows any ERC20 token or ERC721 Enume
 
 ## Structure:
 
-Glue V1 is composed of 6 contracts:
+Glue V1 is composed of 6 smart contracts:
 
 - **GlueStickERC20**: is the factory contract that glues ERC20 tokens.
 - **GlueStickERC721**: is the factory contract that glues ERC721E tokens.
@@ -28,6 +28,7 @@ Glue V1 is composed of 6 contracts:
 - **GlueERC721**: is the contract that creates the Glue Address for a Sticky Token.
 - **GluedSettings**: is the contract that manages the settings of the protocol.
 - **GluedMath**: is the library that contains the math functions used by the protocol.
+- **StickyAsset.sol**: A minimal abstract contract for Glue Protocol Native Assets integration
 
 Glue V1 is composed of 7 interfaces:
 
@@ -38,6 +39,7 @@ Glue V1 is composed of 7 interfaces:
 - **IGluedSettings**: is the interface for the GluedSettings contract.
 - **IGluedLoanReceiver**: is the interface for interacting with Glued Loans and Flash Loans from glues.
 - **IGluedHooks**: is the interface that defines callback mechanisms for Sticky Assets to interact with the Glue Protocol.
+- **IStickyAsset.sol**: Extension interface that defines callback mechanisms for Sticky Assets to interact with the Glue Protocol
 
 ## Deployments:
 
