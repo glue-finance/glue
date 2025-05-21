@@ -23,23 +23,23 @@ Glue V1 is a permissionless protocol that allows any ERC20 token or ERC721 Enume
 Glue V1 is composed of 6 smart contracts:
 
 - [**GlueStickERC20**](https://github.com/glue-finance/glue/blob/main/contracts/GlueERC20.sol): is the factory contract that glues ERC20 tokens.
-- **GlueStickERC721**: is the factory contract that glues ERC721E tokens.
-- **GlueERC20**: is the contract that creates the Glue Address for a Sticky Token.
-- **GlueERC721**: is the contract that creates the Glue Address for a Sticky Token.
-- **GluedSettings**: is the contract that manages the settings of the protocol.
-- **GluedMath**: is the library that contains the math functions used by the protocol.
-- **StickyAsset.sol**: is a minimal abstract contract for Glue Protocol Native Assets integration
+- [**GlueStickERC721**](https://github.com/glue-finance/glue/blob/main/contracts/GlueERC721.sol): is the factory contract that glues ERC721E tokens.
+- [**GlueERC20**](https://github.com/glue-finance/glue/blob/main/contracts/GlueERC20.sol): is the contract that creates the Glue Address for a Sticky Token.
+- [**GlueERC721**](https://github.com/glue-finance/glue/blob/main/contracts/GlueERC721.sol): is the contract that creates the Glue Address for a Sticky Token.
+- [**GluedSettings**](https://github.com/glue-finance/glue/blob/main/contracts/GluedSettings.sol): is the contract that manages the settings of the protocol.
+- [**GluedMath**](https://github.com/glue-finance/glue/blob/main/contracts/libraries/GluedMath.sol): is the library that contains the math functions used by the protocol.
+- [**StickyAsset**](https://github.com/glue-finance/glue/blob/main/contracts/expansions/StickyAsset.sol): is a minimal abstract contract for Glue Protocol Native Assets integration
 
 Glue V1 is composed of 7 interfaces:
 
-- **IGlueStickERC20**: is the interface for the GlueStickERC20 contract.
-- **IGlueStickERC721**: is the interface for the GlueStickERC721 contract.
-- **IGlueERC20**: is the interface for the GlueERC20 contract.
-- **IGlueERC721**: is the interface for the GlueERC721 contract.
-- **IGluedSettings**: is the interface for the GluedSettings contract.
-- **IGluedLoanReceiver**: is the interface for interacting with Glued Loans and Flash Loans from glues.
+- [**IGlueStickERC20**](https://github.com/glue-finance/glue/blob/main/contracts/interfaces/IGlueERC20.sol): is the interface for the GlueStickERC20 contract.
+- [**IGlueStickERC721**](https://github.com/glue-finance/glue/blob/main/contracts/interfaces/IGlueERC721.sol): is the interface for the GlueStickERC721 contract.
+- [**IGlueERC20**](https://github.com/glue-finance/glue/blob/main/contracts/interfaces/IGlueERC20.sol): is the interface for the GlueERC20 contract.
+- [**IGlueERC721**](https://github.com/glue-finance/glue/blob/main/contracts/interfaces/IGlueERC721.sol): is the interface for the GlueERC721 contract.
+- [**IGluedSettings**](https://github.com/glue-finance/glue/blob/main/contracts/interfaces/IGluedSettings.sol): is the interface for the GluedSettings contract.
+- [**IGluedLoanReceiver**](https://github.com/glue-finance/glue/blob/main/contracts/interfaces/IGluedLoanReceiver.sol): is the interface for interacting with Glued Loans and Flash Loans from glues.
 - **IGluedHooks**: is the interface that defines callback mechanisms for Sticky Assets to interact with the Glue Protocol.
-- **IStickyAsset.sol**: is the xtension interface that defines callback mechanisms for Sticky Assets to interact with the Glue Protocol
+- [**IStickyAsset**](https://github.com/glue-finance/glue/blob/main/contracts/interfaces/IStickyAsset.sol): is the xtension interface that defines callback mechanisms for Sticky Assets to interact with the Glue Protocol
 
 ## Deployments:
 
