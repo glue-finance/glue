@@ -1029,7 +1029,7 @@ contract GlueERC721 is Initializable, ERC721Holder, IGlueERC721 {
         if (recipient == address(0)) {recipient = msg.sender;}
 
         // Process the unique token IDs
-        realAmount = processUniqueTokenIds(tokenIds);
+        realAmount = processUniqueTokenIds(tokenIds, recipient);
 
         // Get the real total supply
         (beforeTotalSupply, afterTotalSupply) = getRealTotalSupply(realAmount);
@@ -1052,13 +1052,14 @@ contract GlueERC721 is Initializable, ERC721Holder, IGlueERC721 {
     * @dev Creates a new array with unique token IDs and verifies ownership
     *
     * @param tokenIds Array of token IDs to process
+    * @param recipient The address of the recipient of the unglue operation
     * @return uniqueCount Number of unique token IDs
     *
     * Use cases:
     * - Removing duplicates from the token IDs array
     * - Verifying ownership of the token IDs
     */
-    function processUniqueTokenIds(uint256[] calldata tokenIds) private returns (uint256) {
+    function processUniqueTokenIds(uint256[] calldata tokenIds, address recipient) private returns (uint256) {
 
         // If no token IDs are selected, revert
         if(tokenIds.length == 0) revert NoAssetsSelected();
@@ -1144,7 +1145,7 @@ contract GlueERC721 is Initializable, ERC721Holder, IGlueERC721 {
         burnMain(uniqueTokenIds);
 
         // Execute the hook
-        tryHook(address(this), uniqueCount, uniqueTokenIds);
+        tryHook(address(this), uniqueCount, uniqueTokenIds, recipient);
 
         // If no tokens are transferred, revert
         if (uniqueCount == 0) {
@@ -1339,7 +1340,7 @@ contract GlueERC721 is Initializable, ERC721Holder, IGlueERC721 {
             if (bio == BIO.UNCHECKED || bio == BIO.HOOK) {
 
                 // Execute the hook
-                recipientAmount = tryHook(gluedCollateral, recipientAmount, new uint256[](0));
+                recipientAmount = tryHook(gluedCollateral, recipientAmount, new uint256[](0), recipient);
             }
             
             // Calculate the glue fee amount
@@ -1405,6 +1406,7 @@ contract GlueERC721 is Initializable, ERC721Holder, IGlueERC721 {
     * @param asset The address of the asset
     * @param amount The amount of the asset
     * @param tokenIds The token IDs to execute the hook on
+    * @param recipient The address of the recipient of the unglue operation
     * @return The amount of tokens consumed by the hook operation
     *
     * Use cases:
@@ -1412,7 +1414,7 @@ contract GlueERC721 is Initializable, ERC721Holder, IGlueERC721 {
     * - Sending the hook amount to the sticky token.
     * - Returning the amount minus the hook amount.
     */
-    function tryHook(address asset, uint256 amount, uint256[] memory tokenIds) private returns (uint256) {
+    function tryHook(address asset, uint256 amount, uint256[] memory tokenIds, address recipient) private returns (uint256) {
 
         // If the token is the sticky token, execute the hook
         // This hook dont send ammount to the sticky token, but is designed to track for expanded integration the burned IDs.
@@ -1420,7 +1422,7 @@ contract GlueERC721 is Initializable, ERC721Holder, IGlueERC721 {
 
             if (bio == BIO.HOOK || bio == BIO.UNCHECKED) {
 
-            try IGluedHooks(STICKY_ASSET).executeHook(asset, amount, tokenIds) {
+            try IGluedHooks(STICKY_ASSET).executeHook(asset, amount, tokenIds, recipient) {
                 // Hook executed successfully
             } catch {
                 // Hook execution failed, but we continue processing
@@ -1486,46 +1488,47 @@ contract GlueERC721 is Initializable, ERC721Holder, IGlueERC721 {
                 // No hook enabled
                 return amount;
             }
-            
-            // If the hook amount is 0, return the amount
-            if (hookAmount == 0) return amount;
-            
+
             // Ensure hook amount doesn't exceed available amount
             hookAmount = hookAmount > amount ? amount : hookAmount;
             
-            // If the token is not ETH, transfer the hook amount to the sticky token
-            if (asset != ETH_ADDRESS) {
+            // Only when there's actually an amount to transfer
+            if (hookAmount > 0) {
+                
+                // If the token is not ETH, transfer the hook amount to the sticky token
+                if (asset != ETH_ADDRESS) {
 
-                // Get the balance before
-                uint256 balanceBefore = IERC20(asset).balanceOf(STICKY_ASSET);
+                    // Get the balance before
+                    uint256 balanceBefore = IERC20(asset).balanceOf(STICKY_ASSET);
 
-                // Transfer the hook amount to the sticky token
-                IERC20(asset).safeTransfer(STICKY_ASSET, hookAmount);
+                    // Transfer the hook amount to the sticky token
+                    IERC20(asset).safeTransfer(STICKY_ASSET, hookAmount);
 
-                // Get the balance after
-                uint256 balanceAfter = IERC20(asset).balanceOf(STICKY_ASSET);
+                    // Get the balance after
+                    uint256 balanceAfter = IERC20(asset).balanceOf(STICKY_ASSET);
 
-                // If the balance after is less than or equal to the balance before, set the hook amount to 0
-                if (balanceAfter <= balanceBefore) {
+                    // If the balance after is less than or equal to the balance before, set the hook amount to 0
+                    if (balanceAfter <= balanceBefore) {
 
-                    // Set the hook amount to 0
-                    hookAmount = 0;
+                        // Set the hook amount to 0
+                        hookAmount = 0;
 
+                    } else {
+
+                        // Set the hook amount to the balance after minus the balance before
+                        hookAmount = balanceAfter - balanceBefore;
+                        
+                    }
                 } else {
 
-                    // Set the hook amount to the balance after minus the balance before
-                    hookAmount = balanceAfter - balanceBefore;
-                    
+                    // Send the hook amount to the sticky token
+                    payable(STICKY_ASSET).sendValue(hookAmount);
+
                 }
-            } else {
-
-                // Send the hook amount to the sticky token
-                payable(STICKY_ASSET).sendValue(hookAmount);
-
             }
             
             // Call appropriate hook function with try-catch to handle potential failures
-            try IGluedHooks(STICKY_ASSET).executeHook(asset, hookAmount, tokenIds) {
+            try IGluedHooks(STICKY_ASSET).executeHook(asset, hookAmount, tokenIds, recipient) {
                 // Hook executed successfully
             } catch {
                 // Hook execution failed, but we continue processing

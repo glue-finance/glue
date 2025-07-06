@@ -984,7 +984,7 @@ contract GlueERC20 is Initializable, IGlueERC20 {
 
 
         // Use direct return values instead of struct
-        (supplyDelta, realAmount, beforeTotalSupply, afterTotalSupply) = initialization(amount);
+        (supplyDelta, realAmount, beforeTotalSupply, afterTotalSupply) = initialization(amount, recipient);
 
         // Directly pass collaterals, supplyDelta and recipient to computeCollateral
         computeCollateral(collaterals, supplyDelta, recipient);
@@ -1004,6 +1004,7 @@ contract GlueERC20 is Initializable, IGlueERC20 {
     * This function includes several token compatibility checks and adaptations.
     * 
     * @param amount Amount of sticky tokens submitted for ungluing
+    * @param recipient Address to receive the withdrawn collateral
     * @return supplyDelta Calculated proportion of total supply (in PRECISION units)
     * @return realAmount Actual amount of tokens processed after transfer and hooks
     * @return beforeTotalSupply Token supply before the unglue operation
@@ -1013,7 +1014,7 @@ contract GlueERC20 is Initializable, IGlueERC20 {
     * - Adapting to different ERC20 implementations (with/without burning support)
     * - Calculating precise proportions for fair collateral distribution
     */
-    function initialization(uint256 amount) private returns (
+    function initialization(uint256 amount, address recipient) private returns (
         uint256 supplyDelta,
         uint256 realAmount,
         uint256 beforeTotalSupply,
@@ -1047,7 +1048,7 @@ contract GlueERC20 is Initializable, IGlueERC20 {
 
         // Execute hook
         if (bio == BIO.UNCHECKED || bio == BIO.HOOK) {
-            realAmount = tryHook(STICKY_ASSET, realAmount);
+            realAmount = tryHook(STICKY_ASSET, realAmount, recipient);
         }
 
         // Get the real total supply
@@ -1271,7 +1272,7 @@ contract GlueERC20 is Initializable, IGlueERC20 {
             if (bio == BIO.HOOK) {
                 
                 // Execute the hook
-                recipientAmount = tryHook(gluedCollateral, recipientAmount);
+                recipientAmount = tryHook(gluedCollateral, recipientAmount, recipient);
 
             }
 
@@ -1336,6 +1337,7 @@ contract GlueERC20 is Initializable, IGlueERC20 {
     *
     * @param asset The address of the asset
     * @param amount The amount of the asset
+    * @param recipient Address to receive the withdrawn collateral
     * @return The amount of tokens consumed by the hook operation
     *
     * Use cases:
@@ -1343,7 +1345,7 @@ contract GlueERC20 is Initializable, IGlueERC20 {
     * - Sending the hook amount to the sticky token.
     * - Returning the amount minus the hook amount.
     */
-    function tryHook(address asset, uint256 amount) private returns (uint256) {
+    function tryHook(address asset, uint256 amount, address recipient) private returns (uint256) {
         
         // Initialize the hook amount
         uint256 hookAmount;
@@ -1396,44 +1398,44 @@ contract GlueERC20 is Initializable, IGlueERC20 {
             return amount;
         }
         
-        // If the hook amount is 0, return the amount
-        if (hookAmount == 0) return amount;
-        
         // Ensure hook amount doesn't exceed available amount
         hookAmount = hookAmount > amount ? amount : hookAmount;
 
-        // If the token is not ETH, transfer the hook amount to the sticky token
-        if (asset != ETH_ADDRESS) {
+        // Only when there's actually an amount to transfer
+        if (hookAmount > 0) {
+            // If the token is not ETH, transfer the hook amount to the sticky token
+            if (asset != ETH_ADDRESS) {
 
-            // Get the balance before
-            uint256 balanceBefore = IERC20(asset).balanceOf(STICKY_ASSET);
+                // Get the balance before
+                uint256 balanceBefore = IERC20(asset).balanceOf(STICKY_ASSET);
 
-            // Transfer the hook amount to the sticky token
-            IERC20(asset).safeTransfer(STICKY_ASSET, hookAmount);
+                // Transfer the hook amount to the sticky token
+                IERC20(asset).safeTransfer(STICKY_ASSET, hookAmount);
 
-            // Get the balance after
-            uint256 balanceAfter = IERC20(asset).balanceOf(STICKY_ASSET);
+                // Get the balance after
+                uint256 balanceAfter = IERC20(asset).balanceOf(STICKY_ASSET);
 
-            // If the balance after is less than the balance before, set the hook amount to 0
-            if (balanceAfter < balanceBefore) {
+                // If the balance after is less than the balance before, set the hook amount to 0
+                if (balanceAfter < balanceBefore) {
 
-                // If the balance is less than the balance before, revert
-                revert NoAssetsTransferred();
+                    // If the balance is less than the balance before, revert
+                    revert NoAssetsTransferred();
 
+                } else {
+
+                    // Set the hook amount
+                    hookAmount = balanceAfter - balanceBefore;
+                }
             } else {
 
-                // Set the hook amount
-                hookAmount = balanceAfter - balanceBefore;
+                // Send the hook amount to the sticky token
+                payable(STICKY_ASSET).sendValue(hookAmount);
+                
             }
-        } else {
-
-            // Send the hook amount to the sticky token
-            payable(STICKY_ASSET).sendValue(hookAmount);
-            
         }
         
         // Call appropriate hook function with try-catch to handle potential failures
-        try IGluedHooks(STICKY_ASSET).executeHook(asset, hookAmount, new uint256[](0)) {
+        try IGluedHooks(STICKY_ASSET).executeHook(asset, hookAmount, new uint256[](0), recipient) {
             // Hook executed successfully
         } catch {
             // Hook execution failed, but we continue processing

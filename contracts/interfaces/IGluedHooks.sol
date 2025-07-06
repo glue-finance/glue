@@ -58,10 +58,11 @@ interface IGluedHooks {
      * @param asset The address of the token transferred to the contract (ETH = address(0))
      * @param amount The precise amount of tokens transferred to the contract
      * @param tokenIds Array of token IDs for ERC721 operations (empty for ERC20 tokens)
+     * @param recipient The address of the recipient of the hook
      *
      * Use case: Implementing automatic token buybacks, liquidity provision, or reward distribution
      */
-    function executeHook(address asset, uint256 amount, uint256[] memory tokenIds) external;
+    function executeHook(address asset, uint256 amount, uint256[] memory tokenIds, address recipient) external;
 
     /**
      * @notice Calculates the total impact of all hooks during ungluing operations

@@ -67,8 +67,8 @@ The factory contract addresses remain consistent across all supported networks:
 
 | Contract Name      | Address |
 |--------------------|---------|
-| GlueStickERC20     | 0x49fc990E2E293D5DeB1BC0902f680A3b526a6C60 |
-| GlueStickERC721    | 0x049A5F502Fd740E004526fb74ef66b7a6615976B |
+| GlueStickERC20     | 0x0ddE8dda9f486a4EC5eece60a59248bD28144dFf |
+| GlueStickERC721    | 0xe9B08D7dC8e44F1973269E7cE0fe98297668C257 |
 
 ## License:
 
